@@ -17,3 +17,19 @@ def get_storage():
         return {"error": "No NAS mount info"}
     except Exception as e:
         return {"error": str(e)}
+
+# --- FastAPI router for nas ---
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.get("/")
+def nas_status():
+    try:
+        if "get_stats" in globals():
+            return get_stats()
+        elif "status" in globals():
+            return status()
+        else:
+            return {"module": "nas", "status": "ok"}
+    except Exception as e:
+        return {"error": str(e)}

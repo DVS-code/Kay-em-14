@@ -19,3 +19,18 @@ def get_pm2_status():
         return result
     except Exception as e:
         return {"error": str(e)}
+# --- FastAPI router for pm2 ---
+from fastapi import APIRouter
+router = APIRouter()
+
+@router.get("/")
+def pm2_status():
+    try:
+        if "get_stats" in globals():
+            return get_stats()
+        elif "status" in globals():
+            return status()
+        else:
+            return {"module": "pm2", "status": "ok"}
+    except Exception as e:
+        return {"error": str(e)}

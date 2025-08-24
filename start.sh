@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[BACKEND] Starting HTTPS server..."
-cd "/home/dvs/botfarm/other projects/kay-em-hub"
+# Paths
+BACKEND_DIR="$(pwd)"
+FRONTEND_DIR="$BACKEND_DIR/ui"
+
+echo "[BACKEND] Starting FastAPI server..."
 source venv/bin/activate
-uvicorn server:app --reload --host 0.0.0.0 --port 8000 \
-  --ssl-keyfile=./certs/key.pem \
-  --ssl-certfile=./certs/cert.pem &
+uvicorn server:app --reload --host 0.0.0.0 --port 8000 &
 BACK_PID=$!
 
 echo "[FRONTEND] Starting Vite..."
-cd ui
-npm run dev &
+cd "$FRONTEND_DIR"
+npm run dev -- --host --port 5173 &
 FRONT_PID=$!
 
-trap "kill $BACK_PID $FRONT_PID" SIGINT SIGTERM
-wait
+# Wait for both
+wait $BACK_PID $FRONT_PID
+

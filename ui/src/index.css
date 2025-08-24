@@ -2,16 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ====== Global ====== */
 body {
-  @apply bg-gradient-to-br from-black via-gray-900 to-black text-white;
-  font-family: 'Inter', sans-serif;
+  @apply bg-gradient-dark font-sans text-white;
 }
+
+.bg-gradient-dark {
+  @apply bg-gradient-to-br from-[#141729] via-[#181b2b] to-[#0f121c];
+}
+
+/* ====== Cards ====== */
 .card {
-  @apply bg-gray-900/60 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-purple-500/20;
+  @apply bg-surface/70 backdrop-blur-xl rounded-xl p-4 border border-neon-purple/40 shadow-[0_0_12px_#a855f7];
 }
-.heading {
-  @apply text-xl font-bold text-purple-400;
-}
-.stat {
-  @apply text-2xl font-extrabold text-cyan-400 drop-shadow-lg;
+.card-header { @apply text-lg font-bold text-neon-purple mb-2; }
+.card-stat { @apply text-2xl font-extrabold text-neon-cyan drop-shadow-lg; }
+
+/* ====== Buttons ====== */
+.btn { @apply px-4 py-2 rounded-lg font-bold transition-all; }
+.btn-primary { @apply bg-neon-teal text-black hover:bg-neon-cyan shadow-[0_0_8px_#12fff7]; }
+.btn-critical { @apply bg-critical text-white hover:bg-red-700 shadow-[0_0_8px_#e23646]; }
+.btn-advisory { @apply bg-advisory text-black hover:bg-yellow-500 shadow-[0_0_8px_#ffaf20]; }
+.btn-surface { @apply bg-surface text-white hover:bg-navy; }
+
+/* ====== Terminal ====== */
+.terminal {
+  @apply bg-blackglass border border-neon-purple/30 rounded-xl p-3 font-mono text-sm text-neon-cyan;
 }

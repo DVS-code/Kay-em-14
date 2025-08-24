@@ -1,19 +1,23 @@
-import subprocess, os
+# collectors/router.py
+import subprocess
+from fastapi import APIRouter
 
-def get_latency():
-    targets = os.getenv("PING_TARGETS", "8.8.8.8,1.1.1.1").split(",")
-    results = {}
-    for target in targets:
-        try:
-            output = subprocess.check_output(["ping", "-c", "1", "-W","1", target], text=True)
-            for line in output.splitlines():
-                if "time=" in line:
-                    latency = line.split("time=")[1].split(" ")[0]
-                    results[target] = latency
-        except subprocess.CalledProcessError:
-            results[target] = "unreachable"
-    return results
+router = APIRouter()
 
-# compatibility alias for older server code
-def ping():
-    return get_latency()
+def get_router_status():
+    """Run a command to check router or network status (replace with real logic)."""
+    try:
+        # Example: ping gateway
+        result = subprocess.run(
+            ["ping", "-c", "1", "192.168.1.1"],
+            capture_output=True, text=True
+        )
+        return {"status": "up" if result.returncode == 0 else "down"}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+@router.get("/")
+async def router_status():
+    """Return current router/network status."""
+    return get_router_status()
+

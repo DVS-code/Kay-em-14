@@ -1,0 +1,18 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/system': 'http://localhost:8000',
+      '/pm2': 'http://localhost:8000',
+      '/docker': 'http://localhost:8000',
+      '/nas': 'http://localhost:8000',
+      '/ping': 'http://localhost:8000',
+      '/ai': 'http://localhost:8000',
+      '/recommendations': 'http://localhost:8000',
+      '/logs': 'http://localhost:8000'
+    }
+  }
+})

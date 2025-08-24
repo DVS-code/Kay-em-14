@@ -1,0 +1,92 @@
+SHELL := /usr/bin/env bash
+.ONESHELL:
+# Use '>' instead of TAB to start recipe lines (avoids paste/tab issues)
+.RECIPEPREFIX := >
+
+VENV ?= venv
+PY   := $(VENV)/bin/python3
+PIP  := $(VENV)/bin/pip
+ACT  := source $(VENV)/bin/activate
+API  ?= https://localhost:8000
+
+.DEFAULT_GOAL := start
+
+.PHONY: setup certs start start-backend test logs stop restart status pm2-start pm2-stop pm2-logs pm2-save pm2-delete ci
+
+setup:
+> echo "[SETUP] Creating venv and installing deps..."
+> test -d $(VENV) || python3 -m venv $(VENV)
+> $(PIP) install -U pip
+> if [ -f requirements.txt ]; then \
+>   $(PIP) install -r requirements.txt; \
+> else \
+>   $(PIP) install fastapi 'uvicorn[standard]' starlette psutil requests aiofiles python-multipart; \
+> fi
+> echo "[SETUP] Done."
+
+certs:
+> mkdir -p certs
+> if [ ! -f certs/key.pem ] || [ ! -f certs/cert.pem ]; then \
+>   echo "[CERTS] Generating self-signed certs (1y)"; \
+>   openssl req -x509 -newkey rsa:2048 -nodes -keyout certs/key.pem -out certs/cert.pem \
+>     -subj "/C=US/ST=Local/L=Dev/O=Dev/OU=Dev/CN=localhost/emailAddress=dev@localhost" -days 365; \
+> else \
+>   echo "[CERTS] Existing certs found."; \
+> fi
+
+start: certs
+> echo "[START] Activating venv + launching full stack with tests..."
+> $(ACT); DEV_LOGIN=1 ./start_all.sh
+
+start-backend: certs
+> echo "[BACKEND] Restarting only FastAPI (no frontend)..."
+> fuser -k 8000/tcp || true
+> pkill -f uvicorn || true
+> $(ACT); uvicorn server:app --reload --host 0.0.0.0 --port 8000 \
+>   --ssl-keyfile=./certs/key.pem --ssl-certfile=./certs/cert.pem
+
+test:
+> echo "[TEST] Running endpoint test suite..."
+> $(ACT); ./test_kayem.sh
+
+logs:
+> echo "[LOGS] Tailing test_results.log (Ctrl-C to exit)"
+> touch test_results.log
+> tail -n 200 -F test_results.log
+
+stop:
+> echo "[STOP] Stopping backend/frontend dev processes..."
+> fuser -k 8000/tcp || true
+> pkill -f "npm run dev" || true
+> pkill -f uvicorn || true
+> echo "[STOP] Done."
+
+restart: stop start
+
+status:
+> echo "[STATUS] Matching processes:"
+> ps -ef | egrep "uvicorn|vite|npm run dev|start.sh|start_all.sh" | grep -v egrep || true
+
+pm2-start:
+> echo "[PM2] Starting managed process 'kay-em'..."
+> pm2 start ./start_all.sh --name kay-em --time --interpreter bash || true
+
+pm2-stop:
+> echo "[PM2] Stopping 'kay-em'..."
+> pm2 stop kay-em || true
+
+pm2-logs:
+> pm2 logs kay-em
+
+pm2-save:
+> pm2 save
+
+pm2-delete:
+> echo "[PM2] Deleting 'kay-em'..."
+> pm2 delete kay-em || true
+
+ci:
+> set -e
+> $(ACT); ./test_kayem.sh | tee /tmp/ci.out
+> grep -q "Passed: 7/7" /tmp/ci.out
+> echo "[CI] ✅ All tests passed"

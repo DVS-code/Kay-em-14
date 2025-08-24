@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gradient-to-br from-black via-gray-900 to-black text-white;
+  font-family: 'Inter', sans-serif;
+}
+.card {
+  @apply bg-gray-900/60 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-purple-500/20;
+}
+.heading {
+  @apply text-xl font-bold text-purple-400;
+}
+.stat {
+  @apply text-2xl font-extrabold text-cyan-400 drop-shadow-lg;
+}

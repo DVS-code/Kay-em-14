@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Node / Vite
+node_modules/
+dist/
+.ui-build/
+*.log
+
+# Editors/OS
+.DS_Store
+.vscode/
+.idea/
+
+# Local state & secrets
+.env
+*.pem
+*.key
+*.crt
+certs/
+test_results.log
+*.cookie
+tmp/
+.cache/
+
+# Uvicorn/PM2
+*.pid
